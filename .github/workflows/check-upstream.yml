@@ -14,8 +14,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -34,26 +33,41 @@ jobs:
             echo "up-to-date=false" >> "$GITHUB_OUTPUT"
           fi
 
+      # RELEASE_TOKEN, not the default GITHUB_TOKEN: a GITHUB_TOKEN-pushed
+      # branch doesn't trigger other workflows (recursion prevention), which
+      # would leave build.yml's pull_request check never firing on this
+      # pull request. It's also what lets the auto-merge step below work at
+      # all - the check it's waiting on has to actually run first.
       - name: Open a pull request bumping the pin
         if: steps.check.outputs.up-to-date == 'false'
+        id: pr
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
           CURRENT: ${{ steps.check.outputs.current }}
           LATEST: ${{ steps.check.outputs.latest }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          branch="chore/bump-ltex-$LATEST"
+          branch="fix/bump-ltex-$LATEST"
           git checkout -b "$branch"
           sed -i "s/^ARG LTEX_VERSION=.*/ARG LTEX_VERSION=$LATEST/" Dockerfile
-          git commit -am "chore(deps): bump ltex-ls-plus from $CURRENT to $LATEST"
+          git commit -am "fix(deps): bump ltex-ls-plus from $CURRENT to $LATEST"
           git push origin "$branch" --force
           # A pull request already open for this exact version means a
           # previous run already raised it - reopening or duplicating helps
           # nobody.
-          if ! gh pr list --head "$branch" --json number -q '.[0].number' | grep -q .; then
-            gh pr create --title "chore(deps): bump ltex-ls-plus from $CURRENT to $LATEST" \
-              --body "ltex-plus/ltex-ls-plus released $LATEST: https://github.com/ltex-plus/ltex-ls-plus/releases/tag/$LATEST
-
-          The build check on this pull request won't run automatically - a pull request opened with the default \`GITHUB_TOKEN\` doesn't trigger other workflows. Re-run it by hand (or push an empty commit) before merging."
+          url=$(gh pr list --head "$branch" --json url -q '.[0].url')
+          if [ -z "$url" ]; then
+            url=$(gh pr create --title "fix(deps): bump ltex-ls-plus from $CURRENT to $LATEST" \
+              --body "ltex-plus/ltex-ls-plus released $LATEST: https://github.com/ltex-plus/ltex-ls-plus/releases/tag/$LATEST")
           fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # A version bump like this is routine and already covered by build.yml
+      # actually building the new image - same reasoning as the standing
+      # exception for a Dependabot bump.
+      - name: Auto-merge once checks pass
+        if: steps.check.outputs.up-to-date == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: gh pr merge --auto --squash "${{ steps.pr.outputs.url }}"

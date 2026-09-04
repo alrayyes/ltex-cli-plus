@@ -1,13 +1,24 @@
 version: 2
 updates:
+  # The base image ships in the final image whether or not the bump is
+  # security-relevant, so it gets fix: - the same reasoning releases.md
+  # gives for gomod/bun/pip/composer, extended to the one dependency this
+  # repo actually ships.
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
     labels: [dependencies, docker]
+    commit-message:
+      prefix: fix
+      include: scope
 
+  # Changes the pipeline, not the artifact - ci:, not fix:.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     labels: [dependencies, github_actions]
+    commit-message:
+      prefix: ci
+      include: scope
