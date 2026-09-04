@@ -1,0 +1,46 @@
+# Builds the image on every pull request (catches a broken Dockerfile before
+# merge) and pushes it to ghcr.io on push to main - the only two events that
+# change what the image contains, since there's no other code here to lint.
+name: build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Only needed on the push-to-main path, but granting it here is
+      # simpler than a second job with its own checkout and build step.
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read the pinned LTeX version
+        id: version
+        run: |
+          version=$(grep -m1 '^ARG LTEX_VERSION=' Dockerfile | cut -d= -f2)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Log in to ghcr.io
+        if: github.event_name == 'push'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # A pull request builds without pushing, so a broken Dockerfile fails
+      # the check without publishing anything.
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' }}
+          tags: |
+            ghcr.io/alrayyes/ltex-cli-plus:${{ steps.version.outputs.version }}
+            ghcr.io/alrayyes/ltex-cli-plus:latest

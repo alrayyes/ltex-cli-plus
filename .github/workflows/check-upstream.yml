@@ -1,0 +1,59 @@
+# Dependabot's docker ecosystem watches the FROM image tag, not an ARG
+# pointing at a different project's releases - it has no way to notice a new
+# ltex-ls-plus version on its own. This is the substitute: a weekly check
+# against ltex-plus/ltex-ls-plus's own releases, opening a pull request when
+# the pinned ARG has fallen behind.
+name: check upstream LTeX version
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compare pinned version against the latest upstream release
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          current=$(grep -m1 '^ARG LTEX_VERSION=' Dockerfile | cut -d= -f2)
+          latest=$(gh release view --repo ltex-plus/ltex-ls-plus --json tagName -q .tagName)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          if [ "$current" = "$latest" ]; then
+            echo "up-to-date=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "up-to-date=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open a pull request bumping the pin
+        if: steps.check.outputs.up-to-date == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT: ${{ steps.check.outputs.current }}
+          LATEST: ${{ steps.check.outputs.latest }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          branch="chore/bump-ltex-$LATEST"
+          git checkout -b "$branch"
+          sed -i "s/^ARG LTEX_VERSION=.*/ARG LTEX_VERSION=$LATEST/" Dockerfile
+          git commit -am "chore(deps): bump ltex-ls-plus from $CURRENT to $LATEST"
+          git push origin "$branch" --force
+          # A pull request already open for this exact version means a
+          # previous run already raised it - reopening or duplicating helps
+          # nobody.
+          if ! gh pr list --head "$branch" --json number -q '.[0].number' | grep -q .; then
+            gh pr create --title "chore(deps): bump ltex-ls-plus from $CURRENT to $LATEST" \
+              --body "ltex-plus/ltex-ls-plus released $LATEST: https://github.com/ltex-plus/ltex-ls-plus/releases/tag/$LATEST
+
+          The build check on this pull request won't run automatically - a pull request opened with the default \`GITHUB_TOKEN\` doesn't trigger other workflows. Re-run it by hand (or push an empty commit) before merging."
+          fi
