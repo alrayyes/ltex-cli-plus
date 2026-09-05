@@ -35,11 +35,20 @@ docker run --rm -v "$PWD:/work" -w /work ghcr.io/alrayyes/ltex-cli-plus:18.7.0 \
   --client-configuration=.ltex.json README.md
 ```
 
-The image also ships `git` and `node` - a consuming repo's CI can run
-`container: ghcr.io/alrayyes/ltex-cli-plus:<version>` and check itself out
-with `actions/checkout` straight away, no separate package-install step
-first. Override the entrypoint (`options: --entrypoint ""` on GitHub Actions
-and Forgejo alike) to run anything other than `ltex-cli-plus` itself in that
+### Why the image also ships `git` and `node`
+
+A CI job that runs `container: <image>` (GitHub Actions and Forgejo Actions
+alike) executes every step inside that container's own filesystem, not the
+runner's. `actions/checkout` is a JavaScript action, so it needs a `node`
+runtime to execute at all, and it shells out to `git` to actually fetch the
+repository - neither is optional for checkout to run. Baking both into the
+image means a consumer can go straight from `container: ghcr.io/alrayyes/
+ltex-cli-plus:<version>` to `actions/checkout` with no package-install step
+in between; without them, every consumer would otherwise install the same
+two packages themselves, on every single run.
+
+Override the entrypoint (`options: --entrypoint ""` on GitHub Actions and
+Forgejo alike) to run anything other than `ltex-cli-plus` itself in that
 container.
 
 ## Keeping it current
