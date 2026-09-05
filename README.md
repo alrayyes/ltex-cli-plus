@@ -30,6 +30,13 @@ docker run --rm -v "$PWD:/work" -w /work ghcr.io/alrayyes/ltex-cli-plus:18.7.0 \
   --client-configuration=.ltex.json README.md
 ```
 
+The image also ships `git` and `node` - a consuming repo's CI can run
+`container: ghcr.io/alrayyes/ltex-cli-plus:<version>` and check itself out
+with `actions/checkout` straight away, no separate package-install step
+first. Override the entrypoint (`options: --entrypoint ""` on GitHub Actions
+and Forgejo alike) to run anything other than `ltex-cli-plus` itself in that
+container.
+
 ## Keeping it current
 
 The pinned version lives in `Dockerfile`'s `ARG LTEX_VERSION`.
