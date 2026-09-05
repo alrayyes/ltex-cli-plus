@@ -2,6 +2,7 @@
 
 [![build](https://github.com/alrayyes/ltex-cli-plus/actions/workflows/build.yml/badge.svg)](https://github.com/alrayyes/ltex-cli-plus/actions/workflows/build.yml)
 [![release](https://img.shields.io/github/v/release/alrayyes/ltex-cli-plus)](https://github.com/alrayyes/ltex-cli-plus/releases)
+[![ghcr.io](https://img.shields.io/badge/ghcr.io-ltex--cli--plus-blue)](https://github.com/alrayyes/ltex-cli-plus/pkgs/container/ltex-cli-plus)
 [![licence](https://img.shields.io/github/license/alrayyes/ltex-cli-plus)](LICENSE)
 
 A Debian-based container image bundling [ltex-cli-plus](https://github.com/ltex-plus/ltex-ls-plus),
