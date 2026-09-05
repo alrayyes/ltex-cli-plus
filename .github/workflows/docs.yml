@@ -1,0 +1,54 @@
+# This repo builds a shared tool for everyone else's prose linting; it had
+# none of its own. Structure and mechanics only - no Vale/style tier yet,
+# these three files are short enough that it isn't earning its keep (see
+# #7's tracking of that as a deliberate, smaller scope than the full
+# two-tier setup other repos run).
+name: docs
+
+on:
+  pull_request:
+    paths:
+      - "*.md"
+      - .markdownlint-cli2.yaml
+      - .ltex.json
+      - .github/workflows/docs.yml
+  push:
+    branches: [main]
+    paths:
+      - "*.md"
+      - .markdownlint-cli2.yaml
+      - .ltex.json
+      - .github/workflows/docs.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Structure: headings, list markers, blank lines, dead links.
+  markdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    container:
+      image: davidanson/markdownlint-cli2:v0.23.2@sha256:839558fd0d36c46da0e01ea84fd1d20a2822b5a8a60c16dc9708f0bb7c9e903b
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: markdownlint-cli2
+
+  # Mechanics: grammar, spelling, the phonetic article. A right answer, so
+  # this one gates rather than advises - dogfooding the exact image this
+  # repo builds.
+  ltex:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: ghcr.io/alrayyes/ltex-cli-plus:18.7.0@sha256:22452e86a130e528d526b60792926002983fcbf732bff09bd4e843d22816e4ea
+      options: --entrypoint ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # ltex-cli-plus exits 3 when it finds something, not 1, so a job
+      # testing for a specific code passes a failing document.
+      - run: /usr/local/bin/ltex-cli-plus --client-configuration=.ltex.json README.md CONTRIBUTING.md SECURITY.md

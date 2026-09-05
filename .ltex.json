@@ -1,0 +1,22 @@
+{
+	"ltex": {
+		"language": "en-GB",
+		"dictionary": {
+			"en-GB": [
+				"Dependabot",
+				"Forgejo",
+				"GHCR",
+				"Renovate",
+				"Sigstore",
+				"entrypoint",
+				"filesystem",
+				"ghcr",
+				"hadolint",
+				"ltex-cli-plus"
+			]
+		},
+		"disabledRules": {
+			"en-GB": ["PASSIVE_VOICE", "UPPERCASE_SENTENCE_START"]
+		}
+	}
+}
