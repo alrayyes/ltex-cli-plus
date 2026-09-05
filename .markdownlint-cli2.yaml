@@ -1,0 +1,14 @@
+# Markdown this repo owns: README, CONTRIBUTING, SECURITY. CHANGELOG.md is
+# written by release-please, not by hand. openspec/ has its own format, and
+# .claude/ is vendored OpenSpec tooling docs, not this repo's own prose.
+globs:
+  - "*.md"
+
+ignores:
+  - CHANGELOG.md # written by release-please, not by hand
+
+config:
+  line-length:
+    line_length: 80
+
+extends: "markdownlint/style/prettier"
