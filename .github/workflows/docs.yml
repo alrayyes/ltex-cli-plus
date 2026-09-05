@@ -34,6 +34,11 @@ jobs:
     timeout-minutes: 5
     container:
       image: davidanson/markdownlint-cli2:v0.23.2@sha256:839558fd0d36c46da0e01ea84fd1d20a2822b5a8a60c16dc9708f0bb7c9e903b
+      # This image's own default user is non-root (uid 1000). Confirmed live:
+      # actions/checkout fails outright as that user, EACCES writing to the
+      # runner's own _temp/_runner_file_commands - GitHub Actions does not
+      # override a container job to root, it runs the image's own USER.
+      options: --user root
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: markdownlint-cli2
