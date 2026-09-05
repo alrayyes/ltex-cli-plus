@@ -1,0 +1,7 @@
+# DL3008 (pin apt-get package versions): declined. Debian's own apt mirror
+# doesn't retain old package versions the way a lockfile-backed registry
+# does, so a version pin here is a staleness risk with no real safety
+# benefit - the base image itself is already pinned by digest and kept
+# current by Dependabot, which is what actually matters for these packages.
+ignored:
+  - DL3008

@@ -1,5 +1,9 @@
 # ltex-cli-plus
 
+[![build](https://github.com/alrayyes/ltex-cli-plus/actions/workflows/build.yml/badge.svg)](https://github.com/alrayyes/ltex-cli-plus/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/alrayyes/ltex-cli-plus)](https://github.com/alrayyes/ltex-cli-plus/releases)
+[![licence](https://img.shields.io/github/license/alrayyes/ltex-cli-plus)](LICENSE)
+
 A Debian-based container image bundling [ltex-cli-plus](https://github.com/ltex-plus/ltex-ls-plus),
 built once and reused by CI grammar checks instead of every consuming repo
 downloading and unpacking the same 319 MB tarball on every run.

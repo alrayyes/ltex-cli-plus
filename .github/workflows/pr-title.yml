@@ -1,0 +1,38 @@
+# This repo squash-merges every pull request and has no per-commit
+# commitlint (no bun/node tooling here to run it) - commitlint only ever
+# reads commit objects, and GitHub defaults a squash commit's message to
+# the PR title, so an unconventional title would land on main unchecked and
+# release-please would misread it. pull_request_target, not pull_request:
+# this needs base-repo permissions to comment on a PR from a fork.
+name: pr-title
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Mirrors @commitlint/config-conventional's own type list, so this and
+      # commit.md's convention agree on what's valid.
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
