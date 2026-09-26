@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/alrayyes/ltex-cli-plus/compare/v1.0.1...v1.0.2) (2026-09-26)
+
+
+### Bug Fixes
+
+* **deps:** bump debian from `8820086` to `3783cc0` ([e8ae8e6](https://github.com/alrayyes/ltex-cli-plus/commit/e8ae8e6364002622ed2afb5c42a6f62ed719cad4))
+* **deps:** bump debian from `8820086` to `3783cc0` ([b3da2de](https://github.com/alrayyes/ltex-cli-plus/commit/b3da2de161a30a61e4207e8ae051e51186530abc))
+
 ## [1.0.1](https://github.com/alrayyes/ltex-cli-plus/compare/v1.0.0...v1.0.1) (2026-09-26)
 
 
