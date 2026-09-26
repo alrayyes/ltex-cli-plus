@@ -37,10 +37,20 @@ jobs:
       # wait for that gate itself, rather than polling it from inside the
       # job. Patch and minor only - a major stays a pull request someone
       # reads, the same as any other breaking change would.
-      - name: Enable auto-merge for patch and minor updates
+      #
+      # A docker-ecosystem bump pinned by digest under a fixed tag
+      # (dependencies.md's "image:tag@sha256:..." style) has no semver to
+      # report - fetch-metadata's update-type comes back empty for it, even
+      # though the tag itself, and so any possibility of a major bump, is
+      # unchanged. Treat that case as auto-mergeable too; a real tag change
+      # (bookworm-slim -> trixie-slim) still reports a non-empty update-type
+      # dependabot doesn't recognize as patch/minor, so it still falls
+      # through to a manual PR.
+      - name: Enable auto-merge for patch, minor, and digest-only updates
         if: |
           steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          (steps.metadata.outputs.package-ecosystem == 'docker' && steps.metadata.outputs.update-type == '')
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
