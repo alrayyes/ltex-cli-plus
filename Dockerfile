@@ -1,6 +1,6 @@
 # Debian, not Alpine: ltex-ls-plus ships its own JRE, and that JRE is
 # glibc-linked - it dies on musl before it reads a word.
-FROM debian:bookworm-slim@sha256:88200866dfff7ea7f5cbcb6ec7c8a701889efe6fe859fe64d6990e4b07ea4171
+FROM debian:bookworm-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251
 
 ARG LTEX_VERSION=18.7.0
 
