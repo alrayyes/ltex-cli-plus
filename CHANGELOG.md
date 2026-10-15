@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3](https://github.com/alrayyes/ltex-cli-plus/compare/v1.0.2...v1.0.3) (2026-10-15)
+
+
+### Bug Fixes
+
+* **ci:** run release-auto-merge when the autorelease label is added ([#30](https://github.com/alrayyes/ltex-cli-plus/issues/30)) ([2e12f78](https://github.com/alrayyes/ltex-cli-plus/commit/2e12f785e5dd00cd8a3479ad1de594cd7ef02bee)), closes [#29](https://github.com/alrayyes/ltex-cli-plus/issues/29)
+* **deps:** bump debian from `3783cc0` to `7c7b2c9` ([#28](https://github.com/alrayyes/ltex-cli-plus/issues/28)) ([88592de](https://github.com/alrayyes/ltex-cli-plus/commit/88592de1d473e73a25bc4f31331a78c09d9d98b5))
+
 ## [1.0.2](https://github.com/alrayyes/ltex-cli-plus/compare/v1.0.1...v1.0.2) (2026-09-26)
 
 
