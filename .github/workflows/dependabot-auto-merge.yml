@@ -27,30 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       # build.yml is the gate; this only arms the merge and lets GitHub
       # wait for that gate itself, rather than polling it from inside the
-      # job. Patch and minor only - a major stays a pull request someone
-      # reads, the same as any other breaking change would.
-      #
-      # A docker-ecosystem bump pinned by digest under a fixed tag
-      # (dependencies.md's "image:tag@sha256:..." style) has no semver to
-      # report - fetch-metadata's update-type comes back empty for it, even
-      # though the tag itself, and so any possibility of a major bump, is
-      # unchanged. Treat that case as auto-mergeable too; a real tag change
-      # (bookworm-slim -> trixie-slim) still reports a non-empty update-type
-      # dependabot doesn't recognize as patch/minor, so it still falls
-      # through to a manual PR.
-      - name: Enable auto-merge for patch, minor, and digest-only updates
-        if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
-          (steps.metadata.outputs.package-ecosystem == 'docker' && steps.metadata.outputs.update-type == '')
+      # job. Every update type, majors included, so a digest-only bump and a
+      # tag change are treated alike.
+      - name: Enable auto-merge
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
